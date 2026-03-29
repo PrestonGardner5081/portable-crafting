@@ -15,8 +15,10 @@ public class MixinServerPlayerEntity {
 		return original || PortableCrafting.canUse((ServerPlayerEntity) (Object) this);
 	}
 
-	@WrapWithCondition(method = "openHandledScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;closeHandledScreen()V"))
-	private boolean dontCloseFromPortableScreen(ServerPlayerEntity instance) {
-		return !S2CPortableTags.canSend(instance) || !PortableCrafting.CHANGING_SCREENS;
+	@org.spongepowered.asm.mixin.injection.Inject(method = "closeHandledScreen", at = @At("HEAD"), cancellable = true)
+	private void dontCloseFromPortableScreen(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+		if (S2CPortableTags.canSend((ServerPlayerEntity) (Object) this) && PortableCrafting.CHANGING_SCREENS) {
+			ci.cancel();
+		}
 	}
 }
